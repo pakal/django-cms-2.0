@@ -232,3 +232,11 @@ class RenderingTestCase(CMSTestCase):
         self.test_page = self.old_test_page
         self.assertEqual(r, u'|'+self.test_data['text_main']+'|'+self.test_data3['text_sub'])
 
+    def test_10_placeholdervar(self):
+        """
+        Tests the {% placeholdervar %} templatetag.
+        """
+        t = u'{% load cms_tags %}#{% placeholdervar "main" inherit as myvar %}|{{ myvar }}|{% endplaceholdervar %}{{ myvar }}#'
+        r = self.render(t)
+        self.assertEqual(r, u'#|'+self.test_data['text_main']+'|#')
+        
