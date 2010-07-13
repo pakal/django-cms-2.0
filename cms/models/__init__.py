@@ -70,6 +70,6 @@ validate_dependencies()
 validate_settings()
 
 monkeypatched = False
-if not monkeypatched: 
+if not monkeypatched and getattr(d_settings, "CMS_MULTILINGUAL_PATCH_REVERSE", None): 
     monkeypatch_reverse()
     monkeypatched = True

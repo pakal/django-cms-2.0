@@ -466,3 +466,63 @@ class PluginsMediaNode(template.Node):
 
 register.tag('plugins_media', do_plugins_media)
 
+
+
+
+
+class PlaceholdervarNode(PlaceholderNode):
+    """This template node is used to output page content into a variable,
+    to allow conditional display of miscellaneous layout structures.
+
+    eg: {% placeholdervar "placeholder_name" [inherit] as varname %}
+    
+            {% if varname %}
+                <div class="stuff">
+                    {{ varname }}
+                </div>
+            {% endif %}
+            
+        {% endplaceholdervar %}
+    """
+    
+    def __init__(self, name, var, nodelist, inherit=False):
+        self.name = "".join(name.lower().split('"'))
+        self.var = var
+        self.inherit = inherit
+        self.nodelist = nodelist
+
+    def __repr__(self):
+        return "<Placeholdervar Node: %s as %s>" % (self.name, self.var)
+
+    def render(self, context):
+        content = PlaceholderNode.render(self, context)
+        context.push()
+        context[self.var] = mark_safe(content)
+        output = self.nodelist.render(context)
+        context.pop()
+        return output
+
+def do_placeholdervar(parser, token):
+    error_string = '%r tag requires at least 3 and accepts at most 4 arguments'
+    nodelist_or = None
+    inherit = False
+    try:
+        # split_contents() knows not to split quoted strings.
+        bits = token.split_contents()
+
+        if len(bits) == 5:
+            if bits[2].lower() != "inherit":
+                raise template.TemplateSyntaxError("Parameter 2 must be 'inherit' when using 4 parameters")
+            inherit = True
+        
+        if bits[-2].lower() != "as":
+                raise template.TemplateSyntaxError("Penultimate parameter must be 'as'")
+
+        nodelist = parser.parse(('endplaceholdervar',))
+        parser.delete_first_token()
+        
+    except ValueError:
+        raise template.TemplateSyntaxError(error_string % bits[0])
+    return PlaceholdervarNode(name=bits[1], var=bits[-1], nodelist=nodelist, inherit=inherit)
+        
+register.tag('placeholdervar', do_placeholdervar)
