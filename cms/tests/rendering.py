@@ -232,11 +232,31 @@ class RenderingTestCase(CMSTestCase):
         self.test_page = self.old_test_page
         self.assertEqual(r, u'|'+self.test_data['text_main']+'|'+self.test_data3['text_sub'])
 
-    def test_10_placeholdervar(self):
+    def test_10_placeholdervar_full(self):
         """
-        Tests the {% placeholdervar %} templatetag.
+        Tests the {% placeholdervar %} template tag.
         """
-        t = u'{% load cms_tags %}#{% placeholdervar "main" inherit as myvar %}|{{ myvar }}|{% endplaceholdervar %}{{ myvar }}#'
+        t = u'{% load cms_tags %}#{% placeholdervar "main" as myvar %}|{{ myvar }}|{% endplaceholdervar %}{{ myvar }}#'
         r = self.render(t)
         self.assertEqual(r, u'#|'+self.test_data['text_main']+'|#')
+    
+    def test_11_placeholdervar_empty(self):
+        """
+        Tests an empty {% placeholdervar %} template tag.
+        """
+        t = u'{% load cms_tags %}'+ \
+            u'|{% placeholdervar "empty" as myvar %}-{{ myvar }}-{% endplaceholdervar %}'
+        r = self.render(t)
+        self.assertEqual(r, u'|--')
         
+    def test_12_inherit_placeholdervar(self):
+        """
+        Ensures the 'inherit' option works for {% placeholdervar %}.
+        """
+        t = u'{% load cms_tags %}'+ \
+            u'|{% placeholdervar "main" inherit as myvar %}{{ myvar }}{% endplaceholdervar %}|{% placeholdervar "sub" inherit as myvar%}{{myvar}}{% endplaceholdervar %}'
+        self.old_test_page = self.test_page
+        self.test_page = self.test_page3
+        r = self.render(t)
+        self.test_page = self.old_test_page
+        self.assertEqual(r, u'|'+self.test_data['text_main']+'|'+self.test_data3['text_sub'])

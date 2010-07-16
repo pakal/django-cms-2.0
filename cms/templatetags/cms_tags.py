@@ -490,6 +490,7 @@ class PlaceholdervarNode(PlaceholderNode):
         self.var = var
         self.inherit = inherit
         self.nodelist = nodelist
+        self.nodelist_or = None
 
     def __repr__(self):
         return "<Placeholdervar Node: %s as %s>" % (self.name, self.var)
@@ -504,7 +505,6 @@ class PlaceholdervarNode(PlaceholderNode):
 
 def do_placeholdervar(parser, token):
     error_string = '%r tag requires at least 3 and accepts at most 4 arguments'
-    nodelist_or = None
     inherit = False
     try:
         # split_contents() knows not to split quoted strings.
